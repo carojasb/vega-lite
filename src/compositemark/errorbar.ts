@@ -147,7 +147,7 @@ function errorBarOrientAndInputType(
 
     if (isFieldDef(x2) && isFieldDef(y2)) {
       // having both x, x2 and y, y2
-      throw new Error(compositeMark + ' cannot have both x2 and y2 with both are quantiative');
+      throw new Error(compositeMark + ' cannot have both x2 and y2');
     } else if (isFieldDef(x2)) {
       if (isContinuous(x2) && isFieldDef(x) && isContinuous(x)) {
         // having x, x2 quantitative and field y, y2 are not specified
@@ -214,26 +214,42 @@ function errorBarOrientAndInputType(
 
 function errorBarIsInputTypeRaw(encoding: Encoding<Field>): boolean {
   return (
-    encoding.x &&
-    encoding.y &&
-    !encoding.x2 &&
-    !encoding.y2 &&
-    !encoding.xError &&
-    !encoding.xError2 &&
-    !encoding.yError &&
-    !encoding.yError2
+    (isFieldDef(encoding.x) || isFieldDef(encoding.y)) &&
+    !isFieldDef(encoding.x2) &&
+    !isFieldDef(encoding.y2) &&
+    !isFieldDef(encoding.xError) &&
+    !isFieldDef(encoding.xError2) &&
+    !isFieldDef(encoding.yError) &&
+    !isFieldDef(encoding.yError2)
   );
 }
 
 function errorBarIsInputTypeAggregatedUpperLower(encoding: Encoding<Field>): boolean {
-  return encoding.x && encoding.y && !!(encoding.x2 || encoding.y2);
+  return isFieldDef(encoding.x2) || isFieldDef(encoding.y2);
 }
 
 function errorBarIsInputTypeAggregatedError(encoding: Encoding<Field>): boolean {
-  return encoding.x && encoding.y && !!(encoding.xError || encoding.xError2 || encoding.yError || encoding.yError2);
+  return (
+    isFieldDef(encoding.xError) ||
+    isFieldDef(encoding.xError2) ||
+    isFieldDef(encoding.yError) ||
+    isFieldDef(encoding.yError2)
+  );
 }
 
-export const errorBarSupportedChannels: Channel[] = ['x', 'y', 'x2', 'y2', 'color', 'detail', 'opacity'];
+export const errorBarSupportedChannels: Channel[] = [
+  'x',
+  'y',
+  'x2',
+  'y2',
+  'xError',
+  'yError',
+  'xError2',
+  'yError2',
+  'color',
+  'detail',
+  'opacity'
+];
 
 export function errorBarParams<
   M extends ErrorBar | ErrorBand,
@@ -294,8 +310,11 @@ export function errorBarParams<
   const {
     [continuousAxis]: oldContinuousAxisChannelDef,
     [continuousAxis + '2']: oldContinuousAxisChannelDef2,
+    [continuousAxis + 'Error']: oldContinuousAxisChannelDefError,
+    [continuousAxis + 'Error2']: oldContinuousAxisChannelDefError2,
     ...oldEncodingWithoutContinuousAxis
   } = encoding;
+
   const {
     bins,
     timeUnits,
