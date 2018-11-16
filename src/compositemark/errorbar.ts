@@ -324,7 +324,7 @@ export function errorBarParams<
   } = extractTransformsFromEncoding(oldEncodingWithoutContinuousAxis, config);
 
   const aggregate: AggregatedFieldDef[] = [...oldAggregate, ...errorBarSpecificAggregate];
-  const groupby: string[] = inputType ? [] : oldGroupBy;
+  const groupby: string[] = inputType !== 'raw' ? [] : oldGroupBy;
 
   return {
     transform: [
